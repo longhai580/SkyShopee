@@ -1,10 +1,13 @@
 const CartUtil = {
-    getTotal(mycart) {
-      var total = 0;
-      for (const item of mycart) {
-        total += item.product.price * item.quantity;
-      }
-      return total;
+  getTotal(mycart) {
+    let total = 0;
+    for (const item of mycart) {
+      total += item.product.price * item.quantity;
     }
-  };
-  export default CartUtil;
+    return total;
+  },
+  getCount(mycart) {
+    return mycart.reduce((sum, item) => sum + item.quantity, 0);
+  }
+};
+export default CartUtil;

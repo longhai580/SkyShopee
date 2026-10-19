@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: skyshop
+    runtime: node
+    plan: free
+    buildCommand: cd sever && npm run build
+    startCommand: cd sever && npm start
+    healthCheckPath: /hello
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: CI
+        value: "false"
+      - key: DB_URI
+        sync: false
+      - key: DB_DATABASE
+        value: skyshop
+      - key: JWT_SECRET
+        generateValue: true

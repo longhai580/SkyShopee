@@ -12,7 +12,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #DBEAE9; /* Background color for the entire website */
+    background-color: var(--cust-bg);
     padding: 20px; /* Add padding for better spacing */
 }
 

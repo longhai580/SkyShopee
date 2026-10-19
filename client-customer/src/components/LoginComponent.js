@@ -1,73 +1,71 @@
+import React, { useContext, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import React, { Component } from 'react';
+import { FiUser, FiLock, FiEye, FiEyeOff, FiLogIn } from 'react-icons/fi';
 import MyContext from '../contexts/MyContext';
-import withRouter from '../utils/withRouter';
-import { Link } from 'react-router-dom';
-import '../styles/login.css'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { faLock } from '@fortawesome/free-solid-svg-icons';
 
-class Login extends Component {
-  static contextType = MyContext; // using this.context to access global state
-  constructor(props) {
-    super(props);
-    this.state = {
-      txtUsername: 'sonkk',
-      txtPassword: '123'
-    };
-  }
-  render() {
-    return (
-      <div className="align-center-login">
-        <div className='login-wrapper'>
-        <form>
-        <h2 className="text-center-login">ĐĂNG NHẬP</h2>
-          <div className='input-box'>
-          <input type="text" value={this.state.txtUsername} onChange={(e) => { this.setState({ txtUsername: e.target.value }) }}  placeholder="Tên tài khoản " />
-            <FontAwesomeIcon icon={faUser} className='icon' />
-            <div className='input-box'>
-            <input type="password" value={this.state.txtPassword} onChange={(e) => { this.setState({ txtPassword: e.target.value }) }}  placeholder="Mật khẩu" />
-            <FontAwesomeIcon icon={faLock} className='icon' />
-            </div>
-          </div>
-          <div className='remember-forgot'>
-            <label><input type='checkbox'/>Remember me</label>
-            <a href='#'>Forgot password</a>
-          </div>
-          <input  className='btn-login-submit' type="submit" value="ĐĂNG NHẬP" onClick={(e) => this.btnLoginClick(e)} />
-          <div className='register-link'>
-            <p>Bạn chưa có tài khoản?<Link to='/signup'>Đăng kí ngay</Link></p>
-          </div>
-        </form>
-        </div>
-      </div>
-    );
-  }
-  // event-handlers
-  btnLoginClick(e) {
+function Login() {
+  const ctx = useContext(MyContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state && location.state.from) || '/home';
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const submit = (e) => {
     e.preventDefault();
-    const username = this.state.txtUsername;
-    const password = this.state.txtPassword;
-    if (username && password) {
-      const account = { username: username, password: password };
-      this.apiLogin(account);
-    } else {
-      alert('Please input username and password');
-    }
-  }
-  // apis
-  apiLogin(account) {
-    axios.post('/api/customer/login', account).then((res) => {
-      const result = res.data;
-      if (result.success === true) {
-        this.context.setToken(result.token);
-        this.context.setCustomer(result.customer);
-        this.props.navigate('/home');
-      } else {
-        alert(result.message);
-      }
-    });
-  }
+    if (!username || !password) { setError('Vui lòng nhập tên tài khoản và mật khẩu'); return; }
+    setLoading(true);
+    setError('');
+    axios.post('/api/customer/login', { username, password })
+      .then((res) => {
+        const result = res.data;
+        if (result.success === true) {
+          ctx.setToken(result.token);
+          ctx.setCustomer(result.customer);
+          ctx.notify('Chào mừng ' + result.customer.name + '!');
+          navigate(from, { replace: true });
+        } else {
+          setError(result.message);
+        }
+      })
+      .catch(() => setError('Không kết nối được server'))
+      .finally(() => setLoading(false));
+  };
+
+  return (
+    <div className="auth">
+      <form className="card auth-card" onSubmit={submit}>
+        <h1>Đăng nhập</h1>
+        <p className="muted">Đăng nhập để đặt hàng và theo dõi đơn của bạn.</p>
+        {error && <div className="alert error">{error}</div>}
+        <label className="field">
+          <span>Tên tài khoản</span>
+          <div className="input-icon left">
+            <FiUser />
+            <input value={username} onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoFocus />
+          </div>
+        </label>
+        <label className="field">
+          <span>Mật khẩu</span>
+          <div className="input-icon left">
+            <FiLock />
+            <input type={showPw ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+            <button type="button" className="icon-btn" onClick={() => setShowPw(!showPw)} aria-label="Hiện mật khẩu">{showPw ? <FiEyeOff /> : <FiEye />}</button>
+          </div>
+        </label>
+        <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>
+          <FiLogIn /> {loading ? 'Đang đăng nhập…' : 'Đăng nhập'}
+        </button>
+        <button type="button" className="demo-hint" onClick={() => { setUsername('demo'); setPassword('demo123'); }}>
+          Dùng tài khoản dùng thử: <b>demo</b> / <b>demo123</b>
+        </button>
+        <p className="auth-foot">Chưa có tài khoản? <Link to="/signup">Đăng kí ngay</Link> · <Link to="/active">Kích hoạt</Link></p>
+      </form>
+    </div>
+  );
 }
-export default withRouter(Login);
+export default Login;
