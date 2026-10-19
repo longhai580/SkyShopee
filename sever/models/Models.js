@@ -25,13 +25,20 @@ const ProductSchema = mongoose.Schema({
   name: String,
   price: Number,
   image: String,
+  description: String,
   cdate: Number,
-
   category: CategorySchema
 }, { versionKey: false });
 const ItemSchema = mongoose.Schema({
   product: ProductSchema,
   quantity: Number
+}, { versionKey: false, _id: false });
+const ShippingSchema = mongoose.Schema({
+  name: String,
+  phone: String,
+  address: String,
+  note: String,
+  payment: String
 }, { versionKey: false, _id: false });
 const OrderSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
@@ -39,6 +46,7 @@ const OrderSchema = mongoose.Schema({
   total: Number,
   status: String,
   customer: CustomerSchema,
+  shipping: ShippingSchema,
   items: [ItemSchema]
 }, { versionKey: false });
 // models

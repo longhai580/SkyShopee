@@ -1,115 +1,33 @@
+import React, { useEffect, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import axios from 'axios';
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import withRouter from '../utils/withRouter';
-import { AiFillHome } from "react-icons/ai";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { IoIosLaptop } from "react-icons/io";
-import { faTv} from '@fortawesome/free-solid-svg-icons';
-import { IoPhonePortraitOutline } from "react-icons/io5";
-import { ImHeadphones } from "react-icons/im";
-import { IoWatchOutline } from "react-icons/io5";
-import { BsUsbPlug } from "react-icons/bs";
-import { SlScreenTablet } from "react-icons/sl";
-import { PiDesktopTower} from "react-icons/pi";
-import { TbDeviceMobileDollar } from "react-icons/tb";
-import { RiMegaphoneLine } from "react-icons/ri";
+import { FiGrid } from 'react-icons/fi';
+import { CategoryIcon } from '../utils/format';
 
-import '../styles/Menu.css'
-class Menu extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      categories: []
-    };
-  }
-  render() {
-    const cates = this.state.categories.map((item) => {
-      let categoryIcon;
-      switch (item.name.toLowerCase()) {
-        case 'iphone':
-          categoryIcon = <IoPhonePortraitOutline />;
-          break;
-        case 'macbook':
-          categoryIcon = <IoIosLaptop />;
-          break;
-        case 'ipad':
-          categoryIcon = <SlScreenTablet />;
-          break;
-        case 'tai nghe':
-          categoryIcon = <ImHeadphones />;
-          break;
-        case 'đồng hồ':
-          categoryIcon = <IoWatchOutline />;
-          break;
-        case 'pc':
-          categoryIcon = <PiDesktopTower />;
-          break;
-        case 'phụ kiện':
-          categoryIcon = <BsUsbPlug />;
-          break;
-        case 'tivi':
-          categoryIcon = <FontAwesomeIcon icon={faTv} />;
-          break;
-        case 'thu cũ đổi mới':
-          categoryIcon = <TbDeviceMobileDollar /> ;
-          break;
-        case 'khuyến mãi':
-          categoryIcon = <RiMegaphoneLine /> ;
-          break;
-        
-        
-      }
-      return (
-        <li key={item._id} className="menu">
-        <Link to={'/product/category/' + item._id}>
-          {categoryIcon}
-          {item.name}
-        </Link>
-      </li>
-    );
-  });
-    return (
-      <div className="menu-border-bottom">
-        <div className="menu-float-left">
-          <ul className="menu">
-            <li className="menu"><Link to='/'><AiFillHome/> Trang chủ</Link></li>
-            {cates}
+// Thanh danh mục sản phẩm
+function CategoryNav() {
+  const [categories, setCategories] = useState([]);
 
-            <div style={{ display: "inline" }} class="form-switch">
-        <input class="form-check-input" type="checkbox" onChange={(e) => this.ckbChangeMode(e)} />&nbsp; Light / Dark mode
+  useEffect(() => {
+    axios.get('/api/customer/categories')
+      .then((res) => setCategories(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setCategories([]));
+  }, []);
+
+  return (
+    <nav className="cat-nav" aria-label="Danh mục">
+      <div className="container cat-nav-inner">
+        <NavLink to="/products" className="cat-link">
+          <FiGrid /> Tất cả
+        </NavLink>
+        {categories.map((c) => (
+          <NavLink key={c._id} to={'/product/category/' + c._id} className="cat-link">
+            <CategoryIcon name={c.name} /> {c.name}
+          </NavLink>
+        ))}
       </div>
-          </ul>
-        </div>
-        <div className="float-right">
-          
-        </div>
-        <div className="float-clear" />
-      </div>
-    );
-  }
-  // event-handlers
-  btnSearchClick(e) {
-    e.preventDefault();
-    this.props.navigate('/product/search/' + this.state.txtKeyword);
-  }
-  componentDidMount() {
-    this.apiGetCategories();
-  }
-  // apis
-  apiGetCategories() {
-    axios.get('/api/customer/categories').then((res) => {
-      const result = res.data;
-      this.setState({ categories: result });
-    });
-  }
-    // event-handlers
-    ckbChangeMode(e) {
-      if (e.target.checked) {
-        document.documentElement.setAttribute('data-bs-theme', 'dark');
-      } else {
-        document.documentElement.setAttribute('data-bs-theme', 'light');
-      }
-    }
+    </nav>
+  );
 }
-export default withRouter(Menu);
+
+export default CategoryNav;

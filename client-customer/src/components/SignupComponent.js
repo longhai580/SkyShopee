@@ -1,84 +1,96 @@
+import React, { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/signup.css'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { faLock } from '@fortawesome/free-solid-svg-icons';
-import { faPhone } from '@fortawesome/free-solid-svg-icons';
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { MdOutlineAssignmentInd } from "react-icons/md";
-class Signup extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      txtUsername: '',
-      txtPassword: '',
-      txtName: '',
-      txtPhone: '',
-      txtEmail: ''
-    };
-  }
-  render() {
+import { FiUser, FiLock, FiPhone, FiMail, FiSmile, FiEye, FiEyeOff, FiCheckCircle } from 'react-icons/fi';
+import MyContext from '../contexts/MyContext';
+
+function Signup() {
+  const ctx = useContext(MyContext);
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ username: '', password: '', name: '', phone: '', email: '' });
+  const [agree, setAgree] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(null);
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  const submit = (e) => {
+    e.preventDefault();
+    const { username, password, name, phone, email } = form;
+    if (!username || !password || !name || !phone || !email) return setError('Vui lòng nhập đầy đủ thông tin');
+    if (password.length < 3) return setError('Mật khẩu tối thiểu 3 ký tự');
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setError('Email không hợp lệ');
+    if (!/^[0-9+\s.]{8,15}$/.test(phone)) return setError('Số điện thoại không hợp lệ');
+    if (!agree) return setError('Bạn cần đồng ý với điều khoản');
+    setError('');
+    setLoading(true);
+    axios.post('/api/customer/signup', form)
+      .then((res) => {
+        if (res.data.success) setDone(res.data);
+        else setError(res.data.message);
+      })
+      .catch(() => setError('Không kết nối được server'))
+      .finally(() => setLoading(false));
+  };
+
+  if (done) {
     return (
-      <div className="align-center-signup">
-       <div className='signup-wrapper'>
-        <form>
-        <h2 className="text-center-login">ĐĂNG KÍ TÀI KHOẢN</h2>
-          <div className='input-box-signup'>
-            <input type="text" value={this.state.txtUsername} onChange={(e) => { this.setState({ txtUsername: e.target.value }) }}  placeholder="Tên tài khoản" />            
-            <FontAwesomeIcon icon={faUser} className='icon-signup' />
-          </div>
-          <div className='input-box-signup'>
-            <input type="password" value={this.state.txtPassword} onChange={(e) => { this.setState({ txtPassword: e.target.value }) }}  placeholder="Mật khẩu"/>
-            <FontAwesomeIcon icon={faLock} className='icon-signup' />
-          </div>
-          <div className='input-box-signup'>
-            <input type="text" value={this.state.txtName} onChange={(e) => { this.setState({ txtName: e.target.value }) }}  placeholder="Họ và tên" />
-            <MdOutlineAssignmentInd className='icon-signup' />
-          </div>
-          <div className='input-box-signup'>
-            <input type="tel" value={this.state.txtPhone} onChange={(e) => { this.setState({ txtPhone: e.target.value }) }}  placeholder="Số điện thoại" />
-            <FontAwesomeIcon icon={faPhone} className='icon-signup' />
-          </div>
-          <div className='input-box-signup'>
-            <input type="email" value={this.state.txtEmail} onChange={(e) => { this.setState({ txtEmail: e.target.value }) }}  placeholder="Email" />
-            <FontAwesomeIcon icon={faEnvelope} className='icon-signup' />
-          </div>
-          <div className='remember-forgot-signup'>
-            <label><input type='checkbox'/>Tôi đòng ý với các điều khoản bảo mật cá nhân</label>
-          </div>
-          <input className='btn-signup-submit' type="submit" value="ĐĂNG KÍ" onClick={(e) => this.btnSignupClick(e)} />
-          <div className='register-link-signup'>
-            <p>Bạn đã có tài khoản?<Link to='/login'>Đăng nhập ngay</Link></p>
-          </div>
-        </form>
+      <div className="auth">
+        <div className="card auth-card center">
+          <FiCheckCircle className="success-icon" />
+          <h1>Đăng kí thành công</h1>
+          <p className="muted">{done.message}</p>
+          {done.emailFailed && (
+            <div className="code-box">
+              <div><span>ID</span><code>{done.id}</code></div>
+              <div><span>Token</span><code>{done.token}</code></div>
+            </div>
+          )}
+          <button
+            className="btn btn-primary btn-block"
+            onClick={() => navigate('/active', { state: { id: done.id || '', token: done.token || '' } })}
+          >Kích hoạt tài khoản</button>
+          {done.emailFailed && <p className="small muted">Mẹo: nút trên sẽ tự điền sẵn ID và Token.</p>}
         </div>
-      
       </div>
     );
   }
-  // event-handlers
-  btnSignupClick(e) {
-    e.preventDefault();
-    const username = this.state.txtUsername;
-    const password = this.state.txtPassword;
-    const name = this.state.txtName;
-    const phone = this.state.txtPhone;
-    const email = this.state.txtEmail;
-    if (username && password && name && phone && email) {
-      const account = { username: username, password: password, name: name, phone: phone, email: email };
-      this.apiSignup(account);
-    } else {
-      alert('Please input username and password and name and phone and email');
-    }
-  }
-  // apis
-  apiSignup(account) {
-    axios.post('/api/customer/signup', account).then((res) => {
-      const result = res.data;
-      alert(result.message);
-    });
-  }
+
+  return (
+    <div className="auth">
+      <form className="card auth-card" onSubmit={submit}>
+        <h1>Tạo tài khoản</h1>
+        <p className="muted">Mua sắm nhanh hơn, theo dõi đơn hàng dễ dàng.</p>
+        {error && <div className="alert error">{error}</div>}
+        <div className="form-grid">
+          <label className="field"><span>Tên tài khoản</span>
+            <div className="input-icon left"><FiUser /><input value={form.username} onChange={set('username')} autoComplete="username" /></div>
+          </label>
+          <label className="field"><span>Mật khẩu</span>
+            <div className="input-icon left"><FiLock />
+              <input type={showPw ? 'text' : 'password'} value={form.password} onChange={set('password')} autoComplete="new-password" />
+              <button type="button" className="icon-btn" onClick={() => setShowPw(!showPw)} aria-label="Hiện mật khẩu">{showPw ? <FiEyeOff /> : <FiEye />}</button>
+            </div>
+          </label>
+          <label className="field full"><span>Họ và tên</span>
+            <div className="input-icon left"><FiSmile /><input value={form.name} onChange={set('name')} /></div>
+          </label>
+          <label className="field"><span>Số điện thoại</span>
+            <div className="input-icon left"><FiPhone /><input type="tel" value={form.phone} onChange={set('phone')} /></div>
+          </label>
+          <label className="field"><span>Email</span>
+            <div className="input-icon left"><FiMail /><input type="email" value={form.email} onChange={set('email')} /></div>
+          </label>
+        </div>
+        <label className="checkbox">
+          <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> Tôi đồng ý với điều khoản sử dụng và chính sách bảo mật
+        </label>
+        <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={loading}>{loading ? 'Đang xử lý…' : 'Đăng kí'}</button>
+        <p className="auth-foot">Đã có tài khoản? <Link to="/login">Đăng nhập</Link></p>
+        {ctx.token && <p className="small muted">Bạn đang đăng nhập với tài khoản {ctx.customer && ctx.customer.username}.</p>}
+      </form>
+    </div>
+  );
 }
 export default Signup;

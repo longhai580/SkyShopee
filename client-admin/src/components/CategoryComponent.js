@@ -14,30 +14,42 @@ class Category extends Component {
   }
   render() {
     const cates = this.state.categories.map((item) => {
+      const isSelected = this.state.itemSelected && this.state.itemSelected._id === item._id;
       return (
-        <tr key={item._id} className="datatable" onClick={() => this.trItemClick(item)}>
-          <td>{item._id}</td>
+        <tr
+          key={item._id}
+          className={isSelected ? 'datatable admin-table-row is-selected' : 'datatable admin-table-row'}
+          onClick={() => this.trItemClick(item)}
+        >
+          <td className="admin-id">{item._id}</td>
           <td>{item.name}</td>
         </tr>
       );
     });
     return (
-      <div>
-        <div className="float-left">
-          <h2 className="text-center">CATEGORY LIST</h2>
-          <table className="datatable" border="1">
-            <tbody>
-              <tr className="datatable">
-                <th>ID</th>
-                <th>Name</th>
-              </tr>
-              {cates}
-            </tbody>
-          </table>
-        </div>
-        <div className="inline" />
+      <div className="admin-page admin-page-grid admin-page-grid--compact">
+        <section className="admin-panel admin-panel--table">
+          <div className="admin-panel-head">
+            <div>
+              <p className="admin-kicker">Catalog</p>
+              <h2 className="admin-heading">Categories</h2>
+              <p className="admin-subtitle">{this.state.categories.length} storefront groups are ready to organize products.</p>
+            </div>
+            <span className="admin-badge">{this.state.categories.length} total</span>
+          </div>
+          <div className="admin-table-wrap">
+            <table className="datatable admin-table">
+              <tbody>
+                <tr className="datatable">
+                  <th>ID</th>
+                  <th>Name</th>
+                </tr>
+                {cates}
+              </tbody>
+            </table>
+          </div>
+        </section>
         <CategoryDetail item={this.state.itemSelected} updateCategories={this.updateCategories} />
-        <div className="float-clear" />
       </div>
     );    
   }

@@ -14,26 +14,58 @@ class Login extends Component {
   render() {
     if (this.context.token === '') {
       return (
-        <div className="login-ad-align-valign-center">
-          <h2 className="text-center">ADMIN LOGIN</h2>
-          <form>
-            <table className="login-ad-align-center">
-              <tbody>
-                <tr>
-                  <td>Username</td>
-                  <td><input type="text" value={this.state.txtUsername} onChange={(e) => { this.setState({ txtUsername: e.target.value }) }} /></td>
-                </tr>
-                <tr>
-                  <td>Password</td>
-                  <td><input type="password" value={this.state.txtPassword} onChange={(e) => { this.setState({ txtPassword: e.target.value }) }} /></td>
-                </tr>
-                <tr>
-                  <td></td>
-                  <td><input className='login-ad-btn' type="submit" value="LOGIN" onClick={(e) => this.btnLoginClick(e)} /></td>
-                </tr>
-              </tbody>
-            </table>
-          </form>
+        <div className="login-screen">
+          <div className="login-card">
+            <div className="login-copy">
+              <p className="admin-kicker admin-kicker-light">SkyShop Control Room</p>
+              <h1>Run the store from one clean admin dashboard.</h1>
+              <p>
+                Keep products fresh, manage categories, approve orders, and stay on top
+                of customer activity without hopping between cluttered screens.
+              </p>
+              <div className="login-credential">
+                <span>Demo credentials</span>
+                <strong>admin / admin123</strong>
+              </div>
+              <div className="login-points">
+                <span>Catalog ready</span>
+                <span>Order workflow</span>
+                <span>Atlas connected</span>
+              </div>
+            </div>
+            <div className="login-form-wrap">
+              <div>
+                <p className="admin-kicker">Welcome back</p>
+                <h2 className="login-title">Sign in to continue</h2>
+                <p className="admin-subtitle">Use your admin account to access the dashboard.</p>
+              </div>
+              <form className="admin-form">
+                <div className="admin-field">
+                  <span>Username</span>
+                  <input
+                    className="admin-input"
+                    type="text"
+                    value={this.state.txtUsername}
+                    onChange={(e) => { this.setState({ txtUsername: e.target.value }) }}
+                    placeholder="Enter admin username"
+                  />
+                </div>
+                <div className="admin-field">
+                  <span>Password</span>
+                  <input
+                    className="admin-input"
+                    type="password"
+                    value={this.state.txtPassword}
+                    onChange={(e) => { this.setState({ txtPassword: e.target.value }) }}
+                    placeholder="Enter password"
+                  />
+                </div>
+                <button className='admin-button login-button' type="submit" onClick={(e) => this.btnLoginClick(e)}>
+                  Login
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       );
     }

@@ -1,28 +1,32 @@
 require('../utils/MongooseUtil');
+const mongoose = require('mongoose');
 const Models = require('./Models');
+const Db = require('../utils/Db');
+const Mem = require('../utils/MemoryStore');
 
 const OrderDAO = {
   async insert(order) {
-    const mongoose = require('mongoose');
+    if (await Db.useMemory()) return Mem.order.insert(order);
     order._id = new mongoose.Types.ObjectId();
-    const result = await Models.Order.create(order);
-    return result;
+    return Models.Order.create(order);
   },
   async selectByCustID(_cid) {
-    const query = { 'customer._id': _cid };
-    const orders = await Models.Order.find(query).exec();
-    return orders;
+    if (await Db.useMemory()) return Mem.order.selectByCustID(_cid);
+    if (!mongoose.isValidObjectId(_cid)) return [];
+    return Models.Order.find({ 'customer._id': _cid }).sort({ cdate: -1 }).exec();
   },
   async selectAll() {
-    const query = {};
-    const mysort = { cdate: -1 }; // descending
-    const orders = await Models.Order.find(query).sort(mysort).exec();
-    return orders;
+    if (await Db.useMemory()) return Mem.order.selectAll();
+    return Models.Order.find({}).sort({ cdate: -1 }).exec();
+  },
+  async selectByID(_id) {
+    if (await Db.useMemory()) return Mem.order.selectByID(_id);
+    if (!mongoose.isValidObjectId(_id)) return null;
+    return Models.Order.findById(_id).exec();
   },
   async update(_id, newStatus) {
-    const newvalues = { status: newStatus };
-    const result = await Models.Order.findByIdAndUpdate(_id, newvalues, { new: true });
-    return result;
+    if (await Db.useMemory()) return Mem.order.update(_id, newStatus);
+    return Models.Order.findByIdAndUpdate(_id, { status: newStatus }, { new: true });
   }
 };
 module.exports = OrderDAO;

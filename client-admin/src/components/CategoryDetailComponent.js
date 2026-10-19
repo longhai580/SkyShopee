@@ -13,32 +13,34 @@ class CategoryDetail extends Component {
   }
   render() {
     return (
-      <div className="float-right">
-        <h2 className="text-center">CATEGORY DETAIL</h2>
-        <form>
-          <table>
-            <tbody>
-              <tr>
-                <td>ID</td>
-                <td><input type="text" value={this.state.txtID} onChange={(e) => { this.setState({ txtID: e.target.value }) }} readOnly={true} /></td>
-              </tr>
-              <tr>
-                <td>Name</td>
-                <td><input type="text" value={this.state.txtName} onChange={(e) => { this.setState({ txtName: e.target.value }) }} /></td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>
-                    <input type="submit" value="ADD NEW" onClick={(e) => this.btnAddClick(e)} />
-                    <input type="submit" value="UPDATE" onClick={(e) => this.btnUpdateClick(e)} />
-                    <input type="submit" value="DELETE" onClick={(e) => this.btnDeleteClick(e)} />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <section className="admin-panel admin-panel--form">
+        <div className="admin-panel-head">
+          <div>
+            <p className="admin-kicker">Editor</p>
+            <h2 className="admin-heading">{this.state.txtID ? 'Update Category' : 'Add Category'}</h2>
+            <p className="admin-subtitle">Keep the storefront navigation tidy with short, clear category names.</p>
+          </div>
+        </div>
+        <form className="admin-form">
+          <div className="admin-field">
+            <span>ID</span>
+            <input className="admin-input" type="text" value={this.state.txtID} onChange={(e) => { this.setState({ txtID: e.target.value }) }} readOnly={true} />
+          </div>
+          <div className="admin-field">
+            <span>Name</span>
+            <input className="admin-input" type="text" value={this.state.txtName} onChange={(e) => { this.setState({ txtName: e.target.value }) }} placeholder="Example: iPhone" />
+          </div>
+          <div className="admin-actions">
+            <button className="admin-button" type="submit" onClick={(e) => this.btnAddClick(e)}>Add New</button>
+            <button className="admin-button secondary" type="submit" onClick={(e) => this.btnUpdateClick(e)}>Update</button>
+            <button className="admin-button danger" type="submit" onClick={(e) => this.btnDeleteClick(e)}>Delete</button>
+          </div>
         </form>
-      </div>
+      </section>
     );
+  }
+  resetForm() {
+    this.setState({ txtID: '', txtName: '' });
   }
   // event-handlers
   btnAddClick(e) {
@@ -80,6 +82,7 @@ class CategoryDetail extends Component {
       const result = res.data;
       if (result) {
         alert('OK BABY!');
+        this.resetForm();
         this.apiGetCategories();
       } else {
         alert('SORRY BABY!');
@@ -99,6 +102,7 @@ class CategoryDetail extends Component {
       const result = res.data;
       if (result) {
         alert('OK BABY!');
+        this.resetForm();
         this.apiGetCategories();
       } else {
         alert('SORRY BABY!');
@@ -107,7 +111,11 @@ class CategoryDetail extends Component {
   }
   componentDidUpdate(prevProps) {
     if (this.props.item !== prevProps.item) {
-      this.setState({ txtID: this.props.item._id, txtName: this.props.item.name });
+      if (this.props.item) {
+        this.setState({ txtID: this.props.item._id, txtName: this.props.item.name });
+      } else {
+        this.resetForm();
+      }
     }
   }
   apiPutCategory(id, cate) {

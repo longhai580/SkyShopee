@@ -14,107 +14,142 @@ class Customer extends Component {
   }
   render() {
     const customers = this.state.customers.map((item) => {
+      const isSelected = this.state.orders.length > 0 && this.state.orders[0].customer._id === item._id;
       return (
-        <tr key={item._id} className="datatable" onClick={() => this.trCustomerClick(item)}>
-          <td>{item._id}</td>
+        <tr
+          key={item._id}
+          className={isSelected ? 'datatable admin-table-row is-selected' : 'datatable admin-table-row'}
+          onClick={() => this.trCustomerClick(item)}
+        >
+          <td className="admin-id">{item._id}</td>
           <td>{item.username}</td>
           <td>{item.password}</td>
           <td>{item.name}</td>
           <td>{item.phone}</td>
           <td>{item.email}</td>
-          <td>{item.active}</td>
+          <td><span className={item.active === 1 ? 'status-chip approved' : 'status-chip canceled'}>{item.active === 1 ? 'ACTIVE' : 'INACTIVE'}</span></td>
           <td>
             {item.active === 0 ?
-              <span className="link" onClick={() => this.lnkEmailClick(item)}>EMAIL</span>
+              <span className="action-link approve" onClick={() => this.lnkEmailClick(item)}>Email</span>
               :
-              <span className="link" onClick={() => this.lnkDeactiveClick(item)}>DEACTIVE</span>}
+              <span className="action-link cancel" onClick={() => this.lnkDeactiveClick(item)}>Deactivate</span>}
           </td>
         </tr>
       );
     });
     const orders = this.state.orders.map((item) => {
+      const isSelected = this.state.order && this.state.order._id === item._id;
       return (
-        <tr key={item._id} className="datatable" onClick={() => this.trOrderClick(item)}>
-          <td>{item._id}</td>
+        <tr
+          key={item._id}
+          className={isSelected ? 'datatable admin-table-row is-selected' : 'datatable admin-table-row'}
+          onClick={() => this.trOrderClick(item)}
+        >
+          <td className="admin-id">{item._id}</td>
           <td>{new Date(item.cdate).toLocaleString()}</td>
           <td>{item.customer.name}</td>
           <td>{item.customer.phone}</td>
-          <td>{item.total}</td>
-          <td>{item.status}</td>
+          <td className="admin-price">{item.total.toLocaleString()}đ</td>
+          <td><span className={'status-chip ' + item.status.toLowerCase()}>{item.status}</span></td>
         </tr>
       );
     });
     if (this.state.order) {
       var items = this.state.order.items.map((item, index) => {
         return (
-          <tr key={item.product._id} className="datatable">
+          <tr key={item.product._id} className="datatable admin-table-row">
             <td>{index + 1}</td>
-            <td>{item.product._id}</td>
+            <td className="admin-id">{item.product._id}</td>
             <td>{item.product.name}</td>
-            <td><img src={"data:image/jpg;base64," + item.product.image} width="70px" height="70px" alt="" /></td>
-            <td>{item.product.price}</td>
+            <td><img className="admin-table-image" src={"data:image/jpg;base64," + item.product.image} alt="" /></td>
+            <td className="admin-price">{item.product.price.toLocaleString()}đ</td>
             <td>{item.quantity}</td>
-            <td>{item.product.price * item.quantity}</td>
+            <td className="admin-price">{(item.product.price * item.quantity).toLocaleString()}đ</td>
           </tr>
         );
       });
     }
     return (
-      <div>
-        <div className="align-center">
-          <h2 className="text-center">CUSTOMER LIST</h2>
-          <table className="datatable" border="1">
-            <tbody>
-              <tr className="datatable">
-                <th>ID</th>
-                <th>Username</th>
-                <th>Password</th>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Active</th>
-                <th>Action</th>
-              </tr>
-              {customers}
-            </tbody>
-          </table>
-        </div>
-        {this.state.orders.length > 0 ?
-          <div className="align-center">
-            <h2 className="text-center">ORDER LIST</h2>
-            <table className="datatable" border="1">
+      <div className="admin-page">
+        <section className="admin-panel">
+          <div className="admin-panel-head">
+            <div>
+              <p className="admin-kicker">Customers</p>
+              <h2 className="admin-heading">Customer directory</h2>
+              <p className="admin-subtitle">Review accounts, deactivate access, and inspect each customer's orders.</p>
+            </div>
+            <span className="admin-badge">{this.state.customers.length} total</span>
+          </div>
+          <div className="admin-table-wrap">
+            <table className="datatable admin-table">
               <tbody>
                 <tr className="datatable">
                   <th>ID</th>
-                  <th>Creation date</th>
-                  <th>Cust.name</th>
-                  <th>Cust.phone</th>
-                  <th>Total</th>
-                  <th>Status</th>
+                  <th>Username</th>
+                  <th>Password</th>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Active</th>
+                  <th>Action</th>
                 </tr>
-                {orders}
+                {customers}
               </tbody>
             </table>
           </div>
+        </section>
+        {this.state.orders.length > 0 ?
+          <section className="admin-panel">
+            <div className="admin-panel-head">
+              <div>
+                <p className="admin-kicker">Customer orders</p>
+                <h2 className="admin-heading">Recent order history</h2>
+                <p className="admin-subtitle">Click an order row to inspect its exact line items.</p>
+              </div>
+            </div>
+            <div className="admin-table-wrap">
+              <table className="datatable admin-table">
+                <tbody>
+                  <tr className="datatable">
+                    <th>ID</th>
+                    <th>Creation date</th>
+                    <th>Cust.name</th>
+                    <th>Cust.phone</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                  </tr>
+                  {orders}
+                </tbody>
+              </table>
+            </div>
+          </section>
           : <div />}
         {this.state.order ?
-          <div className="align-center">
-            <h2 className="text-center">ORDER DETAIL</h2>
-            <table className="datatable" border="1">
-              <tbody>
-                <tr className="datatable">
-                  <th>No.</th>
-                  <th>Prod.ID</th>
-                  <th>Prod.name</th>
-                  <th>Image</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Amount</th>
-                </tr>
-                {items}
-              </tbody>
-            </table>
-          </div>
+          <section className="admin-panel">
+            <div className="admin-panel-head">
+              <div>
+                <p className="admin-kicker">Order detail</p>
+                <h2 className="admin-heading">Basket contents</h2>
+                <p className="admin-subtitle">The exact products included in the selected customer order.</p>
+              </div>
+            </div>
+            <div className="admin-table-wrap">
+              <table className="datatable admin-table">
+                <tbody>
+                  <tr className="datatable">
+                    <th>No.</th>
+                    <th>Prod.ID</th>
+                    <th>Prod.name</th>
+                    <th>Image</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Amount</th>
+                  </tr>
+                  {items}
+                </tbody>
+              </table>
+            </div>
+          </section>
           : <div />}
       </div>
     );
