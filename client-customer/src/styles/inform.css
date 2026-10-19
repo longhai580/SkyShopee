@@ -1,9 +1,11 @@
 .inform-border-bottom{
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--cust-border);
     padding: 10px 0px 10px 0px;
     align-items: center;
     display: flex;
     height: 70px ;
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(10px);
 }
 .login-container {
     display: inline-block;
@@ -23,23 +25,23 @@
 /*Link */
 .list-float-right li a {
     text-decoration: none;
-    color: #333; /* Link text color */
+    color: var(--cust-text);
     margin-right: 15px; /* Adjust the spacing between links */
     transition: color 0.3s ease; /* Add a smooth transition effect */
   }
   
   .list-float-right li a:hover {
-    color: #6FC4C4; /* Change the color on hover to your preferred color */
+    color: var(--cust-brand);
   }
   
   .login-container li a {
     text-decoration: none;
-    color: #333; /* Link text color */
+    color: var(--cust-text);
     transition: color 0.3s ease; /* Add a smooth transition effect */
   }
   
   .login-container li a:hover {
-    color: #6FC4C4; /* Change the color on hover to your preferred color */
+    color: var(--cust-brand);
   }
 .list-float-right li{
     display: inline-block;
@@ -54,7 +56,9 @@
     border-radius: 20px;
     width: 370px;
     height: 40px;
-    border: 3px solid black;
+    border: 2px solid var(--cust-brand);
+    color: var(--cust-text);
+    background: var(--cust-panel);
 
 
   }
@@ -72,7 +76,7 @@
 
   }
   .search-icon:hover {
-    color: #6FC4C4; /* Change the color on hover to your preferred color */
+    color: var(--cust-brand);
   }
   .item-count {
     color: #fff; /* Adjust text color as needed */
@@ -84,11 +88,10 @@
     left: -142px; /* Adjust the horizontal position */
     clear: left;
     font-size: 8px; /* Adjust the font size as needed */
-
-    background-color: #f34949;
+    background-color: var(--cust-danger);
   }
   li.link{
-    color: black;
+    color: var(--cust-text);
   }
   .login {
     list-style: none;
@@ -99,7 +102,7 @@
   }
   
   .login:hover {
-    background-color: #f34949;
+    background-color: var(--cust-brand);
     color: #fff;
   }
   
@@ -107,13 +110,13 @@
     list-style: none;
     display: none;
     position: absolute;
-    background-color: #DBEAE9;
+    background-color: var(--cust-panel-soft);
     width: 120px;
     top: 100%;
     left: 0px;
     text-align: center;
-    border: 1px solid #ccc; /* Add a border for better visibility */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle box shadow */
+    border: 1px solid var(--cust-border);
+    box-shadow: var(--cust-shadow);
   }
   .sub-login li {
     white-space: nowrap; /* Remove this line */
@@ -123,7 +126,7 @@
     justify-content: center;
   }
   .sub-login li :hover {
-    background-color: #f34949;
+    background-color: var(--cust-brand);
     display: block;
   }
   .login:hover > .sub-login {

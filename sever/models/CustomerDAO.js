@@ -1,42 +1,43 @@
 require('../utils/MongooseUtil');
+const mongoose = require('mongoose');
 const Models = require('./Models');
+const Db = require('../utils/Db');
+const Mem = require('../utils/MemoryStore');
 
 const CustomerDAO = {
   async selectByUsernameOrEmail(username, email) {
+    if (await Db.useMemory()) return Mem.customer.selectByUsernameOrEmail(username, email);
     const query = { $or: [{ username: username }, { email: email }] };
-    const customer = await Models.Customer.findOne(query);
-    return customer;
+    return Models.Customer.findOne(query);
   },
   async insert(customer) {
-    const mongoose = require('mongoose');
+    if (await Db.useMemory()) return Mem.customer.insert(customer);
     customer._id = new mongoose.Types.ObjectId();
-    const result = await Models.Customer.create(customer);
-    return result;
+    return Models.Customer.create(customer);
   },
   async active(_id, token, active) {
+    if (await Db.useMemory()) return Mem.customer.active(_id, token, active);
+    if (!mongoose.isValidObjectId(_id)) return null;
     const query = { _id: _id, token: token };
-    const newvalues = { active: active };
-    const result = await Models.Customer.findOneAndUpdate(query, newvalues, { new: true });
-    return result;
+    return Models.Customer.findOneAndUpdate(query, { active: active }, { new: true });
   },
   async selectByUsernameAndPassword(username, password) {
-    const query = { username: username, password: password };
-    const customer = await Models.Customer.findOne(query);
-    return customer;
+    if (await Db.useMemory()) return Mem.customer.selectByUsernameAndPassword(username, password);
+    return Models.Customer.findOne({ username: username, password: password });
   },
   async update(customer) {
+    if (await Db.useMemory()) return Mem.customer.update(customer);
     const newvalues = { username: customer.username, password: customer.password, name: customer.name, phone: customer.phone, email: customer.email };
-    const result = await Models.Customer.findByIdAndUpdate(customer._id, newvalues, { new: true });
-    return result;
+    return Models.Customer.findByIdAndUpdate(customer._id, newvalues, { new: true });
   },
   async selectAll() {
-    const query = {};
-    const customers = await Models.Customer.find(query).exec();
-    return customers;
+    if (await Db.useMemory()) return Mem.customer.selectAll();
+    return Models.Customer.find({}).exec();
   },
   async selectByID(_id) {
-    const customer = await Models.Customer.findById(_id).exec();
-    return customer;
+    if (await Db.useMemory()) return Mem.customer.selectByID(_id);
+    if (!mongoose.isValidObjectId(_id)) return null;
+    return Models.Customer.findById(_id).exec();
   }
 };
 module.exports = CustomerDAO;

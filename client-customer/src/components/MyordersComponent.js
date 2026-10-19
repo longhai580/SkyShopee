@@ -1,124 +1,141 @@
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import axios from 'axios';
-import React, { Component } from 'react';
-import { Navigate } from 'react-router-dom';
+import { FiPackage, FiChevronDown, FiChevronUp, FiMapPin, FiPhone, FiUser, FiCreditCard } from 'react-icons/fi';
 import MyContext from '../contexts/MyContext';
-import '../styles/order.css'
-class Myorders extends Component {
-  static contextType = MyContext; // using this.context to access global state
-  constructor(props) {
-    super(props);
-    this.state = {
-      orders: [],
-      order: null
-    };
-  }
-  render() {
-    if (this.context.token === '') return (<Navigate replace to='/login' />);
-    const orders = this.state.orders.map((item) => {
-      return (
-        <tr key={item._id} className="datatable" onClick={() => this.trItemClick(item)}>
-          <td>{item._id}</td>
-          <td>{new Date(item.cdate).toLocaleString()}</td>
-          <td>{item.customer.name}</td>
-          <td>{item.customer.phone}</td>
-          <td>{item.total}</td>
-          <td>{item.status}</td>
-        </tr>
-      );
-    });
-    if (this.state.order) {
-      var items = this.state.order.items.map((item, index) => {
-        return (
-          <tr key={item.product._id} className="datatable">
-            <td>{index + 1}</td>
-            <td>{item.product._id}</td>
-            <td>{item.product.name}</td>
-            <td><img src={"data:image/jpg;base64," + item.product.image} width="70px" height="70px" alt="" /></td>
-            <td>{item.product.price}</td>
-            <td>{item.quantity}</td>
-            <td>{item.product.price * item.quantity}</td>
-          </tr>
-        );
-      });
-    }
-    const orderDetails = this.state.order ? (
-      <div className="align-center">
-        <h2 className="text-center">ORDER DETAIL</h2>
-        <table className="datatable" border="1">
-          <tbody>
-            <tr className="datatable">
-              <th>No.</th>
-              <th>Prod.ID</th>
-              <th>Prod.name</th>
-              <th>Image</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Amount</th>
-            </tr>
-            {this.state.order.items.map((item, index) => (
-              <tr key={item.product._id} className="datatable">
-                <td>{index + 1}</td>
-                <td>{item.product._id}</td>
-                <td>{item.product.name}</td>
-                <td>
-                  <img src={`data:image/jpg;base64,${item.product.image}`} width="70px" height="70px" alt="" />
-                </td>
-                <td>{item.product.price}</td>
-                <td>{item.quantity}</td>
-                <td>{item.product.price * item.quantity}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    ) : null;
-    return (
-      <div>
-        <div className="align-center-order">
-          <div className='table-center'>
-          <section className='table-header'>
-          <h2 className="text-center">ORDER LIST</h2>
-             </section>
-          <section className='table-body'>
-          <table className="datatable" border="1">
-            <tbody>
-              <tr className="datatable">
-                <th>ID</th>
-                <th>Creation date</th>
-                <th>Cust.name</th>
-                <th>Cust.phone</th>
-                <th>Total</th>
-                <th>Status</th>
-              </tr>
-              {orders}
-            </tbody>
-          </table>
-          </section>
-          {orderDetails}
-          </div>
-          
-        </div>
-       
-      </div>
-    );
-  }
-  componentDidMount() {
-    if (this.context.customer) {
-      const cid = this.context.customer._id;
-      this.apiGetOrdersByCustID(cid);
-    }
-  }
-  // event-handlers
-  trItemClick(item) {
-    this.setState({ order: item });
-  }
-  // apis
-  apiGetOrdersByCustID(cid) {
-    const config = { headers: { 'x-access-token': this.context.token } };
-    axios.get('/api/customer/orders/customer/' + cid, config).then((res) => {
-      const result = res.data;
-      this.setState({ orders: result });
-    });
-  }
+import { formatVND, formatDate, imgSrc, ORDER_STATUS, authConfig } from '../utils/format';
+
+const TABS = [
+  { key: 'ALL', label: 'Tất cả' },
+  { key: 'PENDING', label: 'Chờ duyệt' },
+  { key: 'APPROVED', label: 'Đã duyệt' },
+  { key: 'CANCELED', label: 'Đã huỷ' }
+];
+
+function StatusBadge({ status }) {
+  const s = ORDER_STATUS[status] || { label: status, cls: '' };
+  return <span className={'status ' + s.cls}>{s.label}</span>;
 }
+
+function Myorders() {
+  const ctx = useContext(MyContext);
+  const { token, customer, notify } = ctx;
+  const [orders, setOrders] = useState(null);
+  const [tab, setTab] = useState('ALL');
+  const [openId, setOpenId] = useState(null);
+
+  const load = useCallback(() => {
+    if (!customer) return;
+    axios.get('/api/customer/orders/customer/' + customer._id, authConfig(token))
+      .then((res) => setOrders(Array.isArray(res.data) ? res.data : []))
+      .catch(() => { setOrders([]); notify('Không tải được đơn hàng', 'error'); });
+  }, [customer, token, notify]);
+
+  useEffect(() => { load(); }, [load]);
+
+  if (token === '' || !customer) return <Navigate replace to="/login" state={{ from: '/myorders' }} />;
+
+  const cancel = (order) => {
+    if (!window.confirm('Bạn chắc chắn muốn huỷ đơn hàng này?')) return;
+    axios.put('/api/customer/orders/cancel/' + order._id, { cid: customer._id }, authConfig(token))
+      .then((res) => {
+        if (res.data && res.data.success) { notify('Đã huỷ đơn hàng', 'info'); load(); }
+        else notify((res.data && res.data.message) || 'Không huỷ được đơn', 'error');
+      })
+      .catch(() => notify('Không kết nối được server', 'error'));
+  };
+
+  const list = (orders || []).filter((o) => tab === 'ALL' || o.status === tab);
+  const countOf = (k) => (orders || []).filter((o) => k === 'ALL' || o.status === k).length;
+
+  return (
+    <div className="container orders">
+      <div className="page-title"><h1>Đơn hàng của tôi</h1></div>
+      <div className="tabs pill">
+        {TABS.map((t) => (
+          <button key={t.key} className={tab === t.key ? 'active' : ''} onClick={() => setTab(t.key)}>
+            {t.label} <span className="count">{countOf(t.key)}</span>
+          </button>
+        ))}
+      </div>
+
+      {orders === null ? (
+        <div className="card"><div className="sk-line" /><div className="sk-line w60" /></div>
+      ) : list.length === 0 ? (
+        <div className="empty">
+          <FiPackage className="empty-icon" />
+          <h3>Chưa có đơn hàng nào</h3>
+          <Link to="/products" className="btn btn-primary">Mua sắm ngay</Link>
+        </div>
+      ) : (
+        list.map((o) => {
+          const open = openId === o._id;
+          const qty = o.items.reduce((s, it) => s + it.quantity, 0);
+          return (
+            <article key={o._id} className="card order">
+              <header className="order-head" onClick={() => setOpenId(open ? null : o._id)}>
+                <div>
+                  <b>Đơn #{String(o._id).slice(-8).toUpperCase()}</b>
+                  <span className="muted small"> · {formatDate(o.cdate)}</span>
+                </div>
+                <StatusBadge status={o.status} />
+              </header>
+              <div className="order-summary" onClick={() => setOpenId(open ? null : o._id)}>
+                <div className="thumbs">
+                  {o.items.slice(0, 4).map((it, i) => <img key={i} src={imgSrc(it.product && it.product.image)} alt="" />)}
+                  {o.items.length > 4 && <span className="more">+{o.items.length - 4}</span>}
+                </div>
+                <div className="order-total">
+                  <span className="muted small">{qty} sản phẩm</span>
+                  <b>{formatVND(o.total)}</b>
+                </div>
+                <span className="icon-btn">{open ? <FiChevronUp /> : <FiChevronDown />}</span>
+              </div>
+
+              {open && (
+                <div className="order-detail">
+                  <table className="table">
+                    <thead>
+                      <tr><th>Sản phẩm</th><th>Đơn giá</th><th>SL</th><th>Thành tiền</th></tr>
+                    </thead>
+                    <tbody>
+                      {o.items.map((it, i) => (
+                        <tr key={i}>
+                          <td>
+                            <div className="table-prod">
+                              <img src={imgSrc(it.product && it.product.image)} alt="" />
+                              {it.product ? <Link to={'/product/' + it.product._id}>{it.product.name}</Link> : '—'}
+                            </div>
+                          </td>
+                          <td>{formatVND(it.product && it.product.price)}</td>
+                          <td>{it.quantity}</td>
+                          <td><b>{formatVND((it.product ? it.product.price : 0) * it.quantity)}</b></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {o.shipping && (
+                    <div className="ship-info">
+                      <span><FiUser /> {o.shipping.name}</span>
+                      <span><FiPhone /> {o.shipping.phone}</span>
+                      <span><FiMapPin /> {o.shipping.address}</span>
+                      <span><FiCreditCard /> {o.shipping.payment === 'BANK' ? 'Chuyển khoản' : 'Thanh toán khi nhận hàng'}</span>
+                      {o.shipping.note && <span className="muted">Ghi chú: {o.shipping.note}</span>}
+                    </div>
+                  )}
+                  {o.status === 'PENDING' && (
+                    <div className="order-actions">
+                      <button className="btn btn-outline danger" onClick={() => cancel(o)}>Huỷ đơn hàng</button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </article>
+          );
+        })
+      )}
+    </div>
+  );
+}
+
 export default Myorders;

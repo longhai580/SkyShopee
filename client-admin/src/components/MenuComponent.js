@@ -1,26 +1,46 @@
 import React, { Component } from 'react';
 import MyContext from '../contexts/MyContext';
 import '../styles/menu.css'
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 class Menu extends Component {
   static contextType = MyContext; // using this.context to access global state
   render() {
+    const navItems = [
+      { to: '/admin/home', label: 'Dashboard' },
+      { to: '/admin/category', label: 'Categories' },
+      { to: '/admin/product', label: 'Products' },
+      { to: '/admin/order', label: 'Orders' },
+      { to: '/admin/customer', label: 'Customers' }
+    ];
+
     return (
-      <div className="menu-ad-border-bottom">
-        <div className="menu-ad-float-left">
-          <ul className="menuad">
-            <li className="menuad"><Link to='/admin/home'>Trang chủ</Link></li>
-            <li className="menuad"><Link to='/admin/category'>Category</Link></li>
-            <li className="menuad"><Link to='/admin/product'>Product</Link></li>
-            <li className="menuad"><Link to='/admin/order'>Order</Link></li>
-            <li className="menuad"><Link to='/admin/customer'>Customer</Link></li>
-          </ul>
+      <header className="admin-topbar">
+        <Link to='/admin/home' className="admin-brand">
+          <span className="admin-brand-mark">S</span>
+          <span className="admin-brand-copy">
+            <strong>SkyShop Admin</strong>
+            <small>Back office dashboard</small>
+          </span>
+        </Link>
+        <nav className="admin-nav">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) => isActive ? 'admin-nav-link active' : 'admin-nav-link'}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="admin-user-panel">
+          <span className="admin-user-meta">Signed in as</span>
+          <strong className="admin-user-name">{this.context.username}</strong>
+          <button className="admin-logout" type="button" onClick={() => this.lnkLogoutClick()}>
+            Logout
+          </button>
         </div>
-        <div className="float-right">
-          Hello <b>{this.context.username}</b> | <Link to='/admin/home' onClick={() => this.lnkLogoutClick()}>Logout</Link>
-        </div>
-        <div className="float-clear" />
-      </div>
+      </header>
     );
   }
   // event-handlers

@@ -16,52 +16,59 @@ class Product extends Component {
   }
   render() {
     const prods = this.state.products.map((item) => {
+      const isSelected = this.state.itemSelected && this.state.itemSelected._id === item._id;
       return (
-        <tr key={item._id} className="datatable" onClick={() => this.trItemClick(item)}>
-          <td>{item._id}</td>
+        <tr
+          key={item._id}
+          className={isSelected ? 'datatable admin-table-row is-selected' : 'datatable admin-table-row'}
+          onClick={() => this.trItemClick(item)}
+        >
+          <td className="admin-id">{item._id}</td>
           <td>{item.name}</td>
-          <td>{item.price}</td>
+          <td className="admin-price">{item.price.toLocaleString()}đ</td>
           <td>{new Date(item.cdate).toLocaleString()}</td>        
-          <td>{item.category.name}</td>
-          <td><img src={"data:image/jpg;base64," + item.image} width="100px" height="100px" alt="" /></td>
+          <td>{item.category?.name}</td>
+          <td><img className="admin-table-image" src={"data:image/jpg;base64," + item.image} alt="" /></td>
  
         </tr>
       );
     });
     const pagination = Array.from({ length: this.state.noPages }, (_, index) => {
       if ((index + 1) === this.state.curPage) {
-        return (<span key={index}>| <b>{index + 1}</b> |</span>);
+        return (<span key={index} className="admin-page-link active">{index + 1}</span>);
       } else {
-        return (<span key={index} className="link" onClick={() => this.lnkPageClick(index + 1)}>| {index + 1} |</span>);
+        return (<span key={index} className="admin-page-link" onClick={() => this.lnkPageClick(index + 1)}>{index + 1}</span>);
       }
     });
     return (
-      <div>
-        <div className="float-left">
-          <h2 className="text-center">PRODUCT LIST</h2>
-          <table className="datatable" border="1">
-            <tbody>
-              <tr className="datatable">
-                <th>ID</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Creation date</th>
-                <th>Category</th>
-                <th>Image</th>
-           
-
-                
-              </tr>
-              {prods}
-              <tr>
-                <td colSpan="8">{pagination}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="inline" />
+      <div className="admin-page admin-page-grid">
+        <section className="admin-panel admin-panel--table">
+          <div className="admin-panel-head">
+            <div>
+              <p className="admin-kicker">Inventory</p>
+              <h2 className="admin-heading">Products</h2>
+              <p className="admin-subtitle">Browse, edit, and expand the catalog without leaving this screen.</p>
+            </div>
+            <span className="admin-badge">{this.state.noPages} pages</span>
+          </div>
+          <div className="admin-table-wrap">
+            <table className="datatable admin-table">
+              <tbody>
+                <tr className="datatable">
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Price</th>
+                  <th>Creation date</th>
+                  <th>Category</th>
+                  <th>Image</th>
+                </tr>
+                {prods}
+              </tbody>
+            </table>
+          </div>
+          <div className="admin-pagination">{pagination}</div>
+        </section>
         <ProductDetail item={this.state.itemSelected} curPage={this.state.curPage} updateProducts={this.updateProducts} />
-        <div className="float-clear" />
       </div>
     );
   }

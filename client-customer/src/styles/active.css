@@ -7,11 +7,12 @@
 }
 .active-wrapper{
     width: 500px;
-    background-color:#6FC4C4;
+    background: linear-gradient(145deg, var(--cust-brand) 0%, var(--cust-brand-soft) 100%);
     color: #fff;
-    border-radius: 10px;
+    border-radius: 18px;
     padding: 30px 40px;
     margin-top: 8%;
+    box-shadow: var(--cust-shadow);
 
 }
 .active-wrapper h2{
@@ -51,18 +52,18 @@
 .active-wrapper .btn-active-submit{
     width: 100%;
     height: 45px;
-    background:#fff;
+    background: var(--cust-panel);
     border: none;
     outline: none;
     border-radius: 40px ;
     box-shadow: 0 0 10px rgba(0, 0, 0, .1);
     cursor: pointer;
     font-size: 16px;
-    color: #333;
+    color: var(--cust-brand);
     font-weight: 600px;
     margin-top: 90px;
 }
 .btn-active-submit:hover{
     transform: translateY(-0.5rem);
-    box-shadow: 0.5rem 0.75rem 1.5rem #bbbbbb;
+    box-shadow: 0.5rem 0.75rem 1.5rem rgba(24, 49, 44, 0.18);
 }

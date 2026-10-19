@@ -6,8 +6,8 @@
 .table-cart{
     display: flex;
     flex-direction: column;
-    background-color: #fff5;
-    box-shadow: 0 .4rem .8rem #0005;
+    background-color: rgba(255, 255, 255, 0.72);
+    box-shadow: var(--cust-shadow);
     border-radius: .8rem;
     margin-top: 10%;
     
@@ -18,14 +18,14 @@
     padding: 1rem;
     overflow: hidden;
     border-collapse: collapse;
-    border: 1px solid #0003;
+    border: 1px solid var(--cust-border);
 }
 
 .table-cart .datatable tbody {
-    box-shadow: 0 .4rem .8rem #0005;
+    box-shadow: var(--cust-shadow);
 }
 .table {
-    background-color: #fffb;
+    background-color: rgba(255, 255, 255, 0.82);
     border-radius: .6rem;
     overflow: auto;
     overflow: overlay;
@@ -49,7 +49,7 @@
     position: sticky;
     top: 0;
     left: 0;
-    background-color: #d5d1defe;
+    background-color: #e8f1ec;
     cursor: pointer;
     text-transform: capitalize;
 }
@@ -67,15 +67,15 @@
 }
 
 .datatable th:hover span.icon-arrow {
-    border: 1.4px solid #6FC4C4;
+    border: 1.4px solid var(--cust-brand-soft);
 }
 
 .datatable th:hover {
-    color: #6c00bd;
+    color: var(--cust-brand);
 }
 
 .datatable th.active span.icon-arrow {
-    background-color: #6c00bd;
+    background-color: var(--cust-brand);
     color: #fff;
 }
 
@@ -85,5 +85,5 @@
 
 .datatable th.active,
 .datatable td.active {
-    color: #6c00bd;
+    color: var(--cust-brand);
 }
